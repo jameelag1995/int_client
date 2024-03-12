@@ -12,9 +12,15 @@ const Home = () => {
     const { logout, accessToken } = useAuth();
 
     const removeFile = async (fileId) => {
+        console.log("removing file", fileId);
         try {
-            await FileService.deleteFile(fileId);
-            setUploadedFiles((files) => files.filter((f) => f._id !== fileId));
+            await FileService.deleteFile(fileId, accessToken);
+            setUploadedFiles((files) =>
+                files.filter((f) => {
+                    console.log(f);
+                    return f._id !== fileId;
+                })
+            );
         } catch (error) {
             console.error("Error deleting file:", error);
         }
@@ -47,6 +53,15 @@ const Home = () => {
         await FileService.uploadFile(info, accessToken);
         await fetchFiles();
     };
+    const [copySuccess, setCopySuccess] = useState(null);
+
+    const handleCopyToClipboard = () => {
+        const fileUrl = file.shareableLink;
+        navigator.clipboard.writeText(fileUrl).then(
+            () => setCopySuccess("Copied to clipboard!"),
+            () => setCopySuccess("Failed to copy. Please copy manually.")
+        );
+    };
     const navigate = useNavigate();
     return (
         <div className="Page">
@@ -72,12 +87,39 @@ const Home = () => {
                 <div className="Page">
                     <h3>Uploaded Files</h3>
                     <ul>
-                        {uploadedFiles?.map((item) => (
-                            <FileCard
-                                key={item._id}
-                                file={item}
-                                onDelete={removeFile}
-                            />
+                        {uploadedFiles?.map((file) => (
+                            <div className="file-card" key={file._id}>
+                                {file.contentType.startsWith("image") ? (
+                                    <img
+                                        src={file.shareableLink}
+                                        alt="Preview"
+                                    />
+                                ) : file.contentType.startsWith("video") ? (
+                                    <video controls>
+                                        <source
+                                            src={file.shareableLink}
+                                            type={file.contentType}
+                                        />
+                                        Your browser does not support the video
+                                        tag.
+                                    </video>
+                                ) : (
+                                    <div>Unsupported file type</div>
+                                )}
+
+                                <div className="file-info">
+                                    <h3>{file.filename}</h3>
+                                    <button
+                                        onClick={() => removeFile(file._id)}
+                                    >
+                                        Delete
+                                    </button>
+                                    <button onClick={handleCopyToClipboard}>
+                                        Copy URL to Clipboard
+                                    </button>
+                                    {copySuccess && <p>{copySuccess}</p>}
+                                </div>
+                            </div>
                         ))}
                     </ul>
                 </div>

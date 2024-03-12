@@ -27,7 +27,7 @@ const FileCard = ({ file, onDelete }) => {
 
             <div className="file-info">
                 <h3>{file.filename}</h3>
-                <button onClick={onDelete}>Delete</button>
+                <button onClick={() => onDelete(file._id)}>Delete</button>
                 <button onClick={handleCopyToClipboard}>
                     Copy URL to Clipboard
                 </button>
@@ -35,16 +35,6 @@ const FileCard = ({ file, onDelete }) => {
             </div>
         </div>
     );
-};
-
-FileCard.propTypes = {
-    file: PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-        contentType: PropTypes.string.isRequired,
-        // Add other file properties as needed
-    }).isRequired,
-    onDelete: PropTypes.func.isRequired,
-    baseUrl: PropTypes.string.isRequired,
 };
 
 export default FileCard;

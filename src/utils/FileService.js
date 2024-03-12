@@ -59,6 +59,24 @@ const FileService = {
             throw error;
         }
     },
+    deleteFile: async (fileId, token) => {
+        try {
+            console.log("Deleting file");
+            const response = await axios.delete(`${API_BASE_URL}/delete-file`, {
+                headers: {
+                    Authorization: "Bearer " + token,
+                },
+                data: {
+                    fileId: fileId,
+                },
+            });
+            console.log(response);
+            return response.data;
+        } catch (error) {
+            console.error("Error deleting file:", error);
+            throw error;
+        }
+    },
 };
 
 export default FileService;
