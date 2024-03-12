@@ -24,6 +24,7 @@ button {
     border: none;
     height: 32px;
     padding: 4px 8px;
+    margin: 4px;
 }
 button:hover {
     background-color: #444444;
@@ -46,5 +47,21 @@ form {
     gap: 16px;
     padding: 8px;
     background-color: lightgray;
+    border-radius: 6px;
+}
+
+img {
+    width: 300px;
+    height: 300px;
+}
+
+.file-card {
+    padding: 4px;
+    margin: 4px;
+    background-color: #aaaaaa;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     border-radius: 6px;
 }

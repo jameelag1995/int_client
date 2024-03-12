@@ -5,26 +5,42 @@ const API_BASE_URL = "http://localhost:3000/api"; // Replace with your server UR
 
 const FileService = {
     getUploadedFiles: async (token) => {
-        const response = await axios.get(`${API_BASE_URL}/get-my-files`, {
-            headers: { Authorization: "Bearer" + token },
-        });
-        console.log(response);
-        return response.data;
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/files/get-files`,
+                {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    },
+                }
+            );
+            console.log("Response:", response.data);
+            return response.data.myFiles;
+        } catch (error) {
+            console.error("Error fetching uploaded files:", error);
+            throw error; // rethrow the error to propagate it to the caller
+        }
     },
 
     // upload file method
     uploadFile: async (file, token) => {
-        const formData = new FormData();
-        formData.append("uploadedFile", file);
+        const data = {
+            filename: file.public_id,
+            contentType: file.resource_type,
+            shareableLink: file.url,
+        };
 
         try {
-            let res = await axios.post(`${API_BASE_URL}/upload`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: "Bearer" + token,
-                },
-            });
+            let res = await axios.post(
+                `${API_BASE_URL}/upload`,
+                data,
 
+                {
+                    headers: {
+                        Authorization: "Bearer " + token,
+                    },
+                }
+            );
             console.log(res);
             return res.data;
         } catch (err) {

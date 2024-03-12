@@ -22,11 +22,13 @@ export function AuthProvider({ children }) {
     }, [location.pathname]);
     const login = async (email, password) => {
         try {
-            const result = await axios.post(baseURL + "/login", {
+            console.log("logging in");
+            const result = await axios.post(baseURL + "login", {
                 email,
                 password,
             });
 
+            console.log(result);
             setAccessToken(result.data.accessToken);
             localStorage.setItem(
                 "token",
@@ -34,16 +36,13 @@ export function AuthProvider({ children }) {
             );
             return result;
         } catch (error) {
-            return error;
+            console.log(error);
         }
     };
     const register = async (userInfo) => {
         try {
             console.log(userInfo);
-            const result = await axios.post(
-                "http://localhost:3000/api/users/register",
-                userInfo
-            );
+            const result = await axios.post(baseURL + "register", userInfo);
 
             console.log(result);
             setAccessToken(result.data.accessToken);
@@ -59,8 +58,8 @@ export function AuthProvider({ children }) {
     const logout = async () => {
         try {
             if (accessToken) {
-                await axiosUsersInstance.put(
-                    baseURL + "/logout",
+                await axios.put(
+                    baseURL + "logout",
                     {},
                     {
                         headers: {

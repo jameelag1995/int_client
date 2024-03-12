@@ -22,7 +22,7 @@ const Registration = () => {
         console.log("Password:", password);
 
         const result = await register({ username: name, email, password });
-        if (result.status === 201) navigate("/home");
+        if (result?.status === 201) navigate("/home");
         console.log(result);
         // Reset form fields after submission (optional)
         setName("");

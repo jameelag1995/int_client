@@ -14,9 +14,13 @@ const Login = () => {
         // Add your authentication logic here (e.g., API call)
         console.log("Email:", email);
         console.log("Password:", password);
-        const result = await login(email, password);
-        if (result.status === 200) navigate("/home");
-        console.log(result);
+        try {
+            const result = await login(email, password);
+            navigate("/home");
+        } catch (error) {
+            console.log(error);
+        }
+
         // Reset form fields after submission (optional)
         setEmail("");
         setPassword("");

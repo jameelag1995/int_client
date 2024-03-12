@@ -4,130 +4,80 @@ import { useDropzone } from "react-dropzone";
 import FileService from "../../utils/FileService.js"; // Replace with the correct path
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import UploadWidget from "../../components/UploadWidget/UploadWidget.jsx";
+import FileCard from "../../components/Card/Card.jsx";
 
 const Home = () => {
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const { logout, accessToken } = useAuth();
-    const onDrop = useCallback(async (acceptedFiles) => {
-        const validFiles = acceptedFiles.filter((file) => {
-            const validExtensions = [
-                ".jpg",
-                ".jpeg",
-                ".png",
-                ".gif",
-                ".bmp",
-                ".mp4",
-                ".avi",
-                ".mov",
-            ];
-            const isValidExtension = validExtensions.some((ext) =>
-                file.name.toLowerCase().endsWith(ext)
-            );
-            return isValidExtension;
-        });
-
-        const newFiles = await Promise.all(
-            validFiles.map(async (file) => {
-                const uploadedFile = await FileService.uploadFile(
-                    file,
-                    accessToken
-                );
-                return {
-                    file,
-                    tags: [], // Add your tagging logic here
-                    fileId: uploadedFile._id,
-                    shareableLink: await FileService.generateShareableLink(
-                        uploadedFile._id
-                    ),
-                };
-            })
-        );
-
-        setUploadedFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    }, []);
-
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop,
-        accept: [
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".gif",
-            ".bmp",
-            ".mp4",
-            ".avi",
-            ".mov",
-        ],
-    });
 
     const removeFile = async (fileId) => {
         try {
             await FileService.deleteFile(fileId);
-            setUploadedFiles((files) =>
-                files.filter((f) => f.fileId !== fileId)
-            );
+            setUploadedFiles((files) => files.filter((f) => f._id !== fileId));
         } catch (error) {
             console.error("Error deleting file:", error);
         }
     };
 
-    useEffect(() => {
-        const fetchFiles = async () => {
-            try {
-                const files = await FileService.getUploadedFiles(accessToken);
-                setUploadedFiles(files);
-            } catch (error) {
-                console.error("Error fetching uploaded files:", error);
-            }
-        };
-
-        fetchFiles();
-    }, []);
-    const handleLogout = async () => {
-        console.log("logout clicked");
-        const resr = await logout();
-        console.log(res);
+    const fetchFiles = async () => {
+        try {
+            const files = await FileService.getUploadedFiles(accessToken);
+            console.log("files:", files);
+            setUploadedFiles(files);
+        } catch (error) {
+            console.error("Error fetching uploaded files:", error);
+        }
     };
-    const navigate = useNavigate();
     useEffect(() => {
         if (!accessToken) navigate("/");
+        if (accessToken) {
+            fetchFiles();
+            console.log("useEffect uploaded files", uploadedFiles);
+        }
     }, [accessToken]);
+    const handleLogout = async () => {
+        console.log("logout clicked");
+        const res = await logout();
+        console.log(res);
+    };
+    const [info, setInfo] = useState({});
+    const [data, setData] = useState([]);
+    const saveFiles = async () => {
+        await FileService.uploadFile(info, accessToken);
+        await fetchFiles();
+    };
+    const navigate = useNavigate();
     return (
         <div className="Page">
             <button
                 onClick={handleLogout}
-                style={{ backgroundColor: "#b82b2b" }}
+                style={{
+                    backgroundColor: "#b82b2b",
+                    position: "absolute",
+                    top: "16px",
+                    right: "16px",
+                }}
             >
                 Logout
             </button>
             <h2>Home</h2>
-            <div {...getRootProps()} style={dropzoneStyles}>
+            {/* <div {...getRootProps()} style={dropzoneStyles}>
                 <input {...getInputProps()} />
                 <p>Drag and drop files here, or click to select files</p>
-            </div>
-
+            </div> */}
+            <UploadWidget setImages={setData} images={data} setInfo={setInfo} />
+            <button onClick={saveFiles}>save</button>
             {uploadedFiles.length > 0 && (
                 <div className="Page">
                     <h3>Uploaded Files</h3>
                     <ul>
-                        {uploadedFiles.map((item) => (
-                            <li
-                                style={{
-                                    margin: "1em",
-                                    padding: "1em",
-                                    display: "flex",
-                                    gap: "1em",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                                key={item.fileId}
-                            >
-                                <strong>{item.file.name}</strong>{" "}
-                                <h2 onClick={() => removeFile(item.fileId)}>
-                                    X
-                                </h2>
-                                <p>Shareable Link: {item.shareableLink}</p>
-                            </li>
+                        {uploadedFiles?.map((item) => (
+                            <FileCard
+                                key={item._id}
+                                file={item}
+                                onDelete={removeFile}
+                            />
                         ))}
                     </ul>
                 </div>
